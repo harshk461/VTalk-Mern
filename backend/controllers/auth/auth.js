@@ -73,6 +73,7 @@ const loginController = (req, res) => {
                             (err, token) => {
                                 return res.status(200).json({
                                     status: "success",
+                                    username: user.username,
                                     name: user.name,
                                     email: user.email,
                                     token: token
