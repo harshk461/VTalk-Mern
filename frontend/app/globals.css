@@ -5,3 +5,37 @@
 body{
     background-color: #092635;
 }
+
+/* Example styles - adjust as needed */
+.windowO {
+    animation: windowOpen ease-in-out 300ms forwards;
+}
+
+.windowC {
+    animation: windowClose ease-in-out 300ms forwards;
+}
+
+/* Example styles - adjust as needed */
+.windowO,
+.windowC {
+    z-index: 10;
+}
+
+
+@keyframes windowOpen {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes windowClose {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}

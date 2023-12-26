@@ -1,23 +1,3 @@
-// const mongoose = require('mongoose');
-
-// const contactSchema = new mongoose.Schema({
-//     user_id: {
-//         type: String,
-//         required: true
-//     },
-//     contacts: [
-//         {
-//             username: {
-//                 type: String,
-//             },
-//         }
-//     ]
-// });
-
-// const UserContacts = mongoose.model('user_contacts', contactSchema);
-
-// module.exports = UserContacts;
-
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
@@ -32,8 +12,11 @@ const ContactsSchema = new Schema({
         {
             username: {
                 type: String,
-                unique: true
+            },
+            name: {
+                type: String,
             }
+
         }
     ]
 });
@@ -41,7 +24,6 @@ const ContactsSchema = new Schema({
 // Add compound index on user_id and contacts.username
 ContactsSchema.index({ user_id: 1, 'contacts.username': 1 }, { unique: true });
 
-// Create model
 const Contacts = mongoose.model("user_contacts", ContactsSchema);
 
 module.exports = Contacts;

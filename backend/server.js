@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const auth = require('./routes/auth/Auth');
 const contact = require('./routes/contact/contact');
+const chat = require('./routes/chat/chat');
 const PORT = process.env.PORT || 5000;
 const connectDB = require('./config/db');
 const passport = require('passport');
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use("/auth", auth);
 app.use('/contact', contact);
+app.use("/chat", chat);
 
 server.listen(PORT, () => {
     console.log(`Server Connected PORT ${PORT}`);
