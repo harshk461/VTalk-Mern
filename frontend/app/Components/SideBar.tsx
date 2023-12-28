@@ -13,13 +13,14 @@ import { jwtDecode } from 'jwt-decode'
 import NewContactWIndow from '../Utils/NewContactWIndow'
 
 interface ContactData {
-    imageUrl: string,
-    name: string,
-    username: string;
+    imageUrl: String,
+    name: String,
+    username: String;
+    contactID: String;
 }
 
 
-export default function SideBar() {
+export default function SideBar({ socket }: { socket: any }) {
     const [contacts, setContacts] = useState<ContactData[]>([]);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -42,6 +43,10 @@ export default function SideBar() {
 
         fetchContacts();
     }, [openNewContactWindow])
+
+    useEffect(() => {
+        console.log("Mounted");
+    }, [])
 
     return (
         <div className='relative w-[35%] h-full bg-[#111B21] flex flex-col overflow-hidden rounded-s-xl'>
@@ -70,10 +75,12 @@ export default function SideBar() {
                 {contacts.map((item, i) => (
                     <ContactCard
                         key={i}
+                        socket={socket}
                         contact={{
                             imageUrl: "https://res.cloudinary.com/dydeckwis/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1695924851/wihxdvavlfruks3rilqq.jpg",
                             name: item.name,
                             username: item.username,
+                            contactID: item.contactID,
                         }} />
                 ))}
             </div>

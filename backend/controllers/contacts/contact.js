@@ -21,6 +21,22 @@ const addContacts = async (req, res) => {
     const user_id = req.params.user;
     const { username, name, name2 } = req.body;
 
+    // Combine user_id and username
+    const combinedString = user_id + username;
+
+    // Function to shuffle a string
+    function shuffleString(str) {
+        const array = str.split('');
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array.join('');
+    }
+
+    // Create a jumbled string
+    const contactID = shuffleString(combinedString);
+
     try {
         // Check if User1 exists based on the provided user_id
         const userContacts1 = await Contacts.findOne({ user_id });
@@ -29,7 +45,7 @@ const addContacts = async (req, res) => {
             // If User1 doesn't exist, create a new entry
             const newUserContacts1 = new Contacts({
                 user_id,
-                contacts: [{ username, name }]
+                contacts: [{ username, name, contactID }]
             });
             await newUserContacts1.save();
         } else {
@@ -37,7 +53,7 @@ const addContacts = async (req, res) => {
             const isContactExists1 = userContacts1.contacts.some(contact => contact.username === username);
 
             if (!isContactExists1) {
-                userContacts1.contacts.push({ username, name });
+                userContacts1.contacts.push({ username, name, contactID });
                 await userContacts1.save();
             } else {
                 return res.json({ status: "already-exists", error: 'Contact already exists for User1' });
@@ -51,7 +67,7 @@ const addContacts = async (req, res) => {
             // If User2 doesn't exist, create a new entry
             const newUserContacts2 = new Contacts({
                 user_id: username,
-                contacts: [{ username: user_id, name: name2 }]
+                contacts: [{ username: user_id, name: name2, contactID: contactID }]
             });
             await newUserContacts2.save();
         } else {
@@ -59,7 +75,7 @@ const addContacts = async (req, res) => {
             const isContactExists2 = userContacts2.contacts.some(contact => contact.username === user_id);
 
             if (!isContactExists2) {
-                userContacts2.contacts.push({ username: user_id, name: name2 });
+                userContacts2.contacts.push({ username: user_id, name: name2, contactID: contactID });
                 await userContacts2.save();
             } else {
                 return res.json({ status: "already-exists", error: 'Contact already exists for User1' });

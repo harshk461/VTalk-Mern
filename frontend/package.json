@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/socket.io": "^3.0.2",
     "axios": "^1.6.2",
     "cors": "^2.8.5",
     "jwt-decode": "^4.0.0",
@@ -17,7 +18,10 @@
     "next": "14.0.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-hot-toast": "^2.4.1"
+    "react-hot-toast": "^2.4.1",
+    "simplebar": "^6.2.5",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
     "@types/node": "^20",

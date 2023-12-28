@@ -9,8 +9,9 @@ interface UserContextType {
 }
 
 interface ContextData {
-    username: string;
-    name: string;
+    username: String;
+    name: String;
+    contactID: String;
 }
 
 // Create the initial context with default values
@@ -20,7 +21,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [username, setUsername] = React.useState<ContextData>({
         name: '',
-        username: ''
+        username: '',
+        contactID: '',
     });
 
     const updateUsername = (newUser: React.SetStateAction<ContextData>) => {

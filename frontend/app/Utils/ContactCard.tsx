@@ -1,18 +1,23 @@
 import Image from 'next/image'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useUser } from '../context/context';
+import { jwtDecode } from 'jwt-decode';
 
 interface ContactData {
-    imageUrl: string,
-    name: string,
-    username: string;
+    imageUrl: String,
+    name: String,
+    username: String;
+    contactID: String;
 }
 
-export default function ContactCard({ contact }: { contact: ContactData }) {
+export default function ContactCard({ contact, socket }: { contact: ContactData, socket: any }) {
     const { username, updateUsername } = useUser();
+    const user = jwtDecode(localStorage.getItem("token")).username;
     const handleClick = () => {
-        updateUsername({ name: contact.name, username: contact.username });
+        socket?.emit("join_room", contact.contactID);
+        updateUsername({ name: contact.name, username: contact.username, contactID: contact.contactID });
     }
+
     return (
         <div
             onClick={handleClick}

@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import SideBar from './Components/SideBar'
 import ChatWindow from './Components/ChatWindow'
 import { useRouter } from 'next/navigation'
+import { io } from "socket.io-client";
 
 export default function Page() {
   const router = useRouter();
@@ -17,11 +18,18 @@ export default function Page() {
 
     start();
   }, [])
+
+  var socket: any;
+  socket = io("http://localhost:8000", {
+    withCredentials: true,
+  })
+
+
   return (
     <div className='w-full h-screen flex justify-center items-center'>
       <div className='w-[85%] h-[95%] flex shadow-xl shadow-black rounded-xl'>
-        <SideBar />
-        <ChatWindow />
+        <SideBar socket={socket} />
+        <ChatWindow socket={socket} />
       </div>
     </div>
   )

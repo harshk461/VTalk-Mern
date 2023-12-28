@@ -12,9 +12,15 @@ const ContactsSchema = new Schema({
         {
             username: {
                 type: String,
+                requried: true,
             },
             name: {
                 type: String,
+                requried: true,
+            },
+            contactID: {
+                type: String,
+                requried: true,
             }
 
         }
