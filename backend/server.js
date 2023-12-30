@@ -8,15 +8,16 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const auth = require('./routes/auth/Auth');
 const contact = require('./routes/contact/contact');
-const chat = require('./routes/chat/chat');
 const PORT = process.env.PORT || 5000;
 const connectDB = require('./config/db');
 const passport = require('passport');
 const cors = require('cors');
-// const { Server } = require('socket.io');
 
 const server = http.createServer(app);
 
+//Message Function
+const saveMessage = require('./controllers/chat/chat').sendMessage;
+const GetMessage = require('./controllers/chat/chat').GetMessage;
 app.use(cors());
 // Passport middleware
 app.use(passport.initialize());
@@ -38,7 +39,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use("/auth", auth);
 app.use('/contact', contact);
-app.use("/chat", chat);
+// app.use("/chat", chat);
 
 const io = require('socket.io')(server, {
     cors: {
@@ -49,21 +50,26 @@ const io = require('socket.io')(server, {
 });
 io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
-    socket.on("join_room", (roomId) => {
+    socket.on("join_room", async (roomId) => {
         socket.join(roomId);
-        console.log(`user with id-${socket.id} joined room - ${roomId}`);
+        // console.log(`user with id-${socket.id} joined room - ${roomId}`);
+
+        GetMessage(roomId)
+            .then((msg) => {
+                io.in(roomId).emit("all_messages", msg);
+            })
+            .catch((e) => console.log(e));
+
     });
 
-    socket.on("send_msg", (data) => {
-        console.log(data, "DATA");
-        // console.log("Room ID", roomId);
-        //This will send a message to a specific room ID
-        io.in(data.roomId).emit("receive_msg", data);
+    socket.on("send_msg", async (data) => {
+        io.in(data.contactID).emit("receive_msg", data);
+        await saveMessage(data);
     });
 
-    socket.on("disconnect", () => {
-        console.log("A user disconnected:", socket.id);
-    });
+    // socket.on("disconnect", () => {
+    //     console.log("A user disconnected:", socket.id);
+    // });
 });
 
 server.listen(PORT, () => {

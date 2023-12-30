@@ -38,61 +38,73 @@ const addContacts = async (req, res) => {
     const contactID = shuffleString(combinedString);
 
     try {
-        // Check if User1 exists based on the provided user_id
-        const userContacts1 = await Contacts.findOne({ user_id });
+        const user1 = await Contacts.findOne({ user_id: user_id });
+        const user2 = await Contacts.findOne({ user_id: username });
 
-        if (!userContacts1) {
-            // If User1 doesn't exist, create a new entry
-            const newUserContacts1 = new Contacts({
-                user_id,
-                contacts: [{ username, name, contactID }]
+        if (!user1 && !user2) {
+            // Both users do not exist, create new contacts for both
+            const newUser1 = new Contacts({
+                user_id: user_id,
+                contacts: [{ username, name, contactID }],
             });
-            await newUserContacts1.save();
-        } else {
-            // Check if the contact already exists for User1
-            const isContactExists1 = userContacts1.contacts.some(contact => contact.username === username);
 
-            if (!isContactExists1) {
-                userContacts1.contacts.push({ username, name, contactID });
-                await userContacts1.save();
-            } else {
-                return res.json({ status: "already-exists", error: 'Contact already exists for User1' });
-            }
-        }
-
-        // Check if User2 exists based on the provided username
-        const userContacts2 = await Contacts.findOne({ username });
-
-        if (!userContacts2) {
-            // If User2 doesn't exist, create a new entry
-            const newUserContacts2 = new Contacts({
+            const newUser2 = new Contacts({
                 user_id: username,
-                contacts: [{ username: user_id, name: name2, contactID: contactID }]
+                contacts: [{ username: user_id, name: name2, contactID }],
             });
-            await newUserContacts2.save();
-        } else {
-            // Check if the contact already exists for User2
-            const isContactExists2 = userContacts2.contacts.some(contact => contact.username === user_id);
 
-            if (!isContactExists2) {
-                userContacts2.contacts.push({ username: user_id, name: name2, contactID: contactID });
-                await userContacts2.save();
+            await newUser1.save();
+            await newUser2.save();
+        } else {
+            // At least one user exists
+            if (!user1) {
+                // user1 does not exist, create user1 and push contact
+                const newUser1 = new Contacts({
+                    user_id: user_id,
+                    contacts: [{ username, name, contactID }],
+                });
+                await newUser1.save();
             } else {
-                return res.json({ status: "already-exists", error: 'Contact already exists for User1' });
+                const user1_already_exists = user1.contacts.some(contact => contact.username === username);
+                if (!user1_already_exists) {
+                    user1.contacts.push({ username: username, name: name, contactID: contactID });
+                    await user1.save();
+                }
+                else {
+                    return res.json({ "status": "already-exists", "message": "contact Already Exists" });
+                }
             }
+
+            if (!user2) {
+                // user2 does not exist, create user2 and push contact
+                const newUser2 = new Contacts({
+                    user_id: username,
+                    contacts: [{ username: user_id, name: name2, contactID }],
+                });
+                await newUser2.save();
+            } else {
+                const user2_already_exists = user2.contacts.some(contact => contact.username === user_id);
+                if (!user2_already_exists) {
+                    user2.contacts.push({ username: user_id, name: name2, contactID: contactID });
+                    await user2.save();
+                } else {
+                    return res.json({ "status": "already-exists", "message": "contact Already Exists" });
+                }
+            }
+
         }
 
-        return res.status(201).json({ message: 'Contacts added successfully' });
     } catch (error) {
         console.error('Error adding contacts:', error);
 
         // Check if the error is a duplicate key error
         if (error.code === 11000) {
-            return res.status(400).json({ error: 'Duplicate key violation. User or contact already exists.' });
+            return res.json({ error: 'Duplicate key violation. User or contact already exists.' });
         }
 
         return res.status(500).json({ error: 'Internal Server Error' });
     }
+
 };
 
 

@@ -10,18 +10,24 @@ interface ContactData {
     contactID: String;
 }
 
-export default function ContactCard({ contact, socket }: { contact: ContactData, socket: any }) {
+export default function ContactCard(
+    { contact, socket, index, currentIndex, setCurrentIndex }
+        : { contact: ContactData, socket: any, index: Number, currentIndex: Number, setCurrentIndex: Function }) {
     const { username, updateUsername } = useUser();
-    const user = jwtDecode(localStorage.getItem("token")).username;
+    const token = localStorage.getItem("token");
+    const user = token ? jwtDecode(token).username : '';
     const handleClick = () => {
+        setCurrentIndex(index);
         socket?.emit("join_room", contact.contactID);
         updateUsername({ name: contact.name, username: contact.username, contactID: contact.contactID });
+        console.log(currentIndex === index);
     }
 
     return (
         <div
             onClick={handleClick}
-            className='flex gap-4 items-center p-4 cursor-pointer'>
+            className={`flex gap-4 items-center p-4 cursor-pointer
+            ${index === currentIndex ? 'pointer-events-none' : ''}`}>
             <Image
                 src={contact.imageUrl}
                 alt='Contact'

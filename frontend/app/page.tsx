@@ -5,9 +5,11 @@ import SideBar from './Components/SideBar'
 import ChatWindow from './Components/ChatWindow'
 import { useRouter } from 'next/navigation'
 import { io } from "socket.io-client";
+import { useUser } from './context/context'
 
 export default function Page() {
   const router = useRouter();
+  const { username } = useUser();
   useEffect(() => {
     const start = () => {
       const token = localStorage.getItem("token");

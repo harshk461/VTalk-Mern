@@ -1,36 +1,37 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode'
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
 import toast from 'react-hot-toast';
 
 
 export default function NewContactCard({ name, username, setWindow }: { name: string, username: string, setWindow: Function }) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const [loading, setLoading] = useState(false);
     const AddContact = async () => {
         const token = localStorage.getItem("token");
         const name2 = token ? (jwtDecode(token) as { name: string }).name : '';
         const user_id = token ? (jwtDecode(token) as { username: string }).username : '';
-
         const data = { username: username, name: name, name2: name2 };
 
         try {
-            await axios.post(baseUrl + "/contact/add/" + user_id, data)
-                .then(res => {
-                    if (res.data.status == 'already-exists') {
-                        toast.error("Contact Already Exists");
-                        return;
-                    }
-                    console.log(res.data);
-                    setWindow(false);
-                })
-        }
-        catch (e) {
-            toast.error("Server Error");
-            console.log(e.message);
-        }
+            setLoading(true);
+            const response = await axios.post(baseUrl + "/contact/add/" + user_id, data);
+            console.log(response.data); // Log the response data for debugging
 
+            if (response.data.status === 'already-exists') {
+                toast.error("Contact Already Exists");
+            } else {
+                setWindow(false);
+            }
+        } catch (error) {
+            toast.error("Error: " + error.message);
+            console.error("Error in AddContact:", error);
+        } finally {
+            setLoading(false);
+        }
     }
+
 
     return (
         <div
@@ -51,7 +52,10 @@ export default function NewContactCard({ name, username, setWindow }: { name: st
             </div>
 
             <button className='px-6 flex items-center  bg-green-500 rounded-md text-white font-semibold cursor-pointer'>
-                Add
+                {loading ?
+                    <div className='w-[30px] h-[30px] border-t-2 animate-spin rounded-full'></div>
+                    :
+                    "Add"}
             </button>
         </div >
     )

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useUser } from '../context/context'
 import Image from 'next/image';
 import {
@@ -16,34 +16,64 @@ import MessageBox from '../Utils/MessageBox';
 
 interface IMsgDataTypes {
     message: String;
-    roomId: String;
-    user: String;
+    contactID: String;
+    user1: String;
+    user2: String;
+    sender: String;
 }
 
+interface Chat {
+    sender: String;
+    message: String;
+}
 
 export default function ChatWindow({ socket }: { socket: any }) {
     const { username } = useUser();
     const [message, setMessage] = useState('');
-    const [chat, setChat] = useState<IMsgDataTypes[]>([]);
-    const user = jwtDecode(localStorage.getItem("token")).username;
+    const [chat, setChat] = useState<Chat[]>([]);
+    const token = localStorage.getItem("token");
+    const user1 = token ? jwtDecode(token).username : '';
+    const chatContainerRef = useRef();
+
+    useEffect(() => {
+        setChat([]);
+    }, [username]);
+
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [chat]);
+
     const sendMessage = async () => {
-        console.log(username);
         const messageData = {
-            user: user,
+            user1: user1,
+            user2: username.username,
             message: message,
-            roomId: username.contactID,
+            contactID: username.contactID,
+            sender: user1,
         };
         await socket?.emit("send_msg", messageData);
         setMessage('');
     };
 
     useEffect(() => {
-        socket?.on("receive_msg", (data: IMsgDataTypes) => {
+        socket?.on("receive_msg", (data) => {
             setChat((prevChat) => [...prevChat, data]);
         });
+
+        // return () => socket.off('receive_msg');
     }, [socket]);
 
-    console.log("Chat Array:", chat);
+    useEffect(() => {
+        socket?.on("all_messages", (data) => {
+            setChat((pre) => [...pre, ...data.messages]);
+        });
+
+        // return () => socket.off("all_messages");
+    }, [socket]);
+
+
     return (
         <div className='relative w-full h-full bg-grey-700 flex flex-col'>
             <div className='w-full px-4 py-2 flex gap-10 h-[70px] items-center bg-[#111B21]'>
@@ -61,9 +91,12 @@ export default function ChatWindow({ socket }: { socket: any }) {
             </div>
 
             {/*Messages Window*/}
-            <div className='w-full h-full flex flex-col gap-1 p-4 overflow-y-scroll scroll'>
+            <div className='w-full h-full flex flex-col gap-1 p-4 overflow-y-scroll scroll' ref={chatContainerRef}>
                 {chat.map((item, i) => (
-                    <MessageBox user={item.user} message={item.message} key={i} />
+                    <MessageBox
+                        user={item.sender}
+                        message={item.message}
+                        key={i} />
                 ))}
             </div>
 

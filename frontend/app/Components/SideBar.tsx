@@ -23,7 +23,7 @@ interface ContactData {
 export default function SideBar({ socket }: { socket: any }) {
     const [contacts, setContacts] = useState<ContactData[]>([]);
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-
+    const [currentIndex, setCurrentIndex] = useState(-1);
     const [openNewContactWindow, setOpenNewContactWindow] = useState(false);
 
     useEffect(() => {
@@ -43,10 +43,6 @@ export default function SideBar({ socket }: { socket: any }) {
 
         fetchContacts();
     }, [openNewContactWindow])
-
-    useEffect(() => {
-        console.log("Mounted");
-    }, [])
 
     return (
         <div className='relative w-[35%] h-full bg-[#111B21] flex flex-col overflow-hidden rounded-s-xl'>
@@ -75,6 +71,9 @@ export default function SideBar({ socket }: { socket: any }) {
                 {contacts.map((item, i) => (
                     <ContactCard
                         key={i}
+                        index={i}
+                        currentIndex={currentIndex}
+                        setCurrentIndex={setCurrentIndex}
                         socket={socket}
                         contact={{
                             imageUrl: "https://res.cloudinary.com/dydeckwis/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1695924851/wihxdvavlfruks3rilqq.jpg",

@@ -1,33 +1,57 @@
 const Chat = require('../../models/message.model');
 
-const SendMessage = async (req, res) => {
-    const { user1, user2, contactID, message, sender } = req.body;
-    const ChatAlreadyExists = await Chat.findOne({ contactID: contactID });
+async function sendMessage(data) {
+    const { user1, user2, contactID, message, sender } = data;
+    const chatAlreadyExists = await Chat.findOne({ contactID: contactID });
 
-    if (!ChatAlreadyExists) {
-        const newChat = new Chat({
-            contactID: contactID,
-            users: { user1, user2 },
-            messages: { sender, message },
-        });
+    if (!chatAlreadyExists) {
+        try {
+            const newChat = new Chat({
+                contactID: contactID,
+                users: { user1, user2 },
+                messages: { sender, message },
+            });
 
-        newChat.save();
+            await newChat.save();
+            console.log("Success");
+            return { status: "success", message: "sent" };
+        } catch (e) {
+            console.log("error");
+            return { status: "error", message: "Server Error" };
+        }
+    } else {
+        try {
+            chatAlreadyExists.messages.push({ sender, message });
+            await chatAlreadyExists.save();
+            return { status: "success", message: "sent" };
+        } catch (e) {
+            return { status: "error", message: "Server Error" };
+        }
     }
-
-    return res.json({ "jds": "djh" });
 }
 
-const GetMessage = async (req, res) => {
-    const { contactID } = req.params;
-    const chats = await Chat.find({ contactID });
-    if (!chats) {
-        return res.json({ "status": "Contact Not found" });
-    }
+const GetMessage = (contactID) => {
+    return new Promise((resolve, reject) => {
+        Chat.find({ contactID }).sort()
+            .then((chats) => {
+                if (!chats || chats.length === 0) {
+                    resolve({ status: "Contact Not found", messages: [] });
+                    return;
+                }
 
-    return res.json(chats[0].messages);
-}
+                // Assuming you want to get messages from the first chat in the array
+                const messages = chats[0].messages || [];
+
+                resolve({ status: "success", messages });
+            })
+            .catch((error) => {
+                console.error("Error retrieving messages:", error);
+                resolve({ status: "error", message: "Server Error" });
+            });
+    });
+};
 
 module.exports = {
-    SendMessage,
-    GetMessage
+    sendMessage,
+    GetMessage,
 }
